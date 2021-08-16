@@ -14,3 +14,31 @@ var tasks = [
   delay(3),
   delay(5)
 ];
+
+class PromiseQueue {
+  constructor(promises=[], concurrentCount=1) {
+    this.concurrentCount = concurrentCount;
+    this.total = promisses.length;
+    this.todo = promises;
+    this.running = [];
+    this.complete = [];
+  }
+
+  get runAnother() {
+    return (this.running.length < this.concurrentCount) && this.todo.length;
+  }
+
+  run() {
+    while(this.runAnother) {
+      var promise = this.todo.shift();
+      promise.then(() => {
+        this.complete.push(this.running.shift());
+        this.run();
+      })
+      this.running.push(promise);
+    }
+  }
+}
+
+var delayQueue = new PromiseQueue(tasks, 2);
+delayQueue.run();
